@@ -1,0 +1,61 @@
+<.header>
+  Invoices
+  <:subtitle>Manage your customer invoices</:subtitle>
+  <:actions>
+    <.link patch={~p"/invoices/new"}>
+      <.button>New Invoice</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="invoices"
+  rows={@streams.invoices}
+  row_click={fn {_id, invoice} -> JS.navigate(~p"/invoices/#{invoice}") end}
+>
+  <:col :let={{_id, invoice}} label="Invoice #">#{invoice.id}</:col>
+  <:col :let={{_id, invoice}} label="Date">{invoice.date}</:col>
+  <:col :let={{_id, invoice}} label="Customer">
+    <%= if invoice.customer do %>
+      <%= invoice.customer.person_in_charge %>
+    <% else %>
+      Not specified
+    <% end %>
+  </:col>
+  <:col :let={{_id, invoice}} label="Total Amount" class="font-semibold">
+    <%= invoice.total_amount %>
+  </:col>
+  <:action :let={{_id, invoice}}>
+    <div class="sr-only">
+      <.link navigate={~p"/invoices/#{invoice}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/invoices/#{invoice}"} class="text-zinc-600 hover:text-zinc-900">
+      View
+    </.link>
+  </:action>
+  <:action :let={{_id, invoice}}>
+    <.link patch={~p"/invoices/#{invoice}/edit"} class="text-zinc-600 hover:text-zinc-900">
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{id, invoice}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: invoice.id}) |> hide("##{id}")}
+      data-confirm="Are you sure you want to delete this invoice?"
+      class="text-zinc-600 hover:text-zinc-900"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="invoice-modal" show on_cancel={JS.patch(~p"/invoices")} max-width="4xl">
+  <.live_component
+    module={CrmWeb.InvoiceLive.FormComponent}
+    id={@invoice.id || :new}
+    title={@page_title}
+    action={@live_action}
+    invoice={@invoice}
+    patch={~p"/invoices"}
+  />
+</.modal>

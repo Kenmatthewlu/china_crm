@@ -1,0 +1,158 @@
+<.header>
+  Invoice #{@invoice.id}
+  <:subtitle>Invoice details</:subtitle>
+  <:actions>
+    <.link patch={~p"/invoices/#{@invoice}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit invoice</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6 flex justify-between">
+    <div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Invoice Information</h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">Invoice details and customer information.</p>
+    </div>
+    <div class="text-right">
+      <p class="text-sm font-medium text-gray-500">Invoice #</p>
+      <p class="text-lg font-bold">{"SI-001#{@invoice.id}"}</p>
+      <p class="text-sm font-medium text-gray-500 mt-2">Date</p>
+      <p class="text-md">{@invoice.date}</p>
+    </div>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Customer</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= if @invoice.customer do %>
+            <%= @invoice.customer.person_in_charge %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Email</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= if @invoice.customer do %>
+            <%= @invoice.customer.email %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Company Address</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= if @invoice.customer do %>
+            <%= @invoice.customer.company_address %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Warehouse Address</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= if @invoice.customer do %>
+            <%= @invoice.customer.warehouse_address %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <%= if @invoice.customer do %>
+            <%= @invoice.customer.phone %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Invoice Items</h3>
+    <p class="mt-1 max-w-2xl text-sm text-gray-500">Products included in this invoice.</p>
+  </div>
+  <div class="border-t border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Product</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Quantity</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Unit Price</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Discount (%)</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Total</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <%= if Enum.empty?(@invoice.invoice_items) do %>
+            <tr>
+              <td colspan="4" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">No items in this invoice</td>
+            </tr>
+          <% else %>
+            <%= for item <- @invoice.invoice_items do %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= if item.product do %>
+                    <%= item.product.name %>
+                  <% else %>
+                    Unknown product
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= item.quantity %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= item.unit_price %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= item.discount || 0 %>%</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% item_total = Decimal.mult(Decimal.new(item.quantity), item.unit_price) %>
+                  <% discount_amount = if Decimal.compare(item.discount || Decimal.new(0), Decimal.new(0)) == :gt do
+                       Decimal.mult(item_total, Decimal.div(item.discount || Decimal.new(0), Decimal.new(100)))
+                     else
+                       Decimal.new(0)
+                     end %>
+                  <%= Decimal.sub(item_total, discount_amount) %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Invoice Summary</h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+        <dd class="mt-1 text-sm font-bold text-gray-900 sm:mt-0 sm:col-span-2"><%= @invoice.total_amount %></dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<.back navigate={~p"/invoices"}>Back to invoices</.back>
+
+<.modal :if={@live_action == :edit} id="invoice-modal" show on_cancel={JS.patch(~p"/invoices/#{@invoice}")} max-width="4xl">
+  <.live_component
+    module={CrmWeb.InvoiceLive.FormComponent}
+    id={@invoice.id}
+    title={@page_title}
+    action={@live_action}
+    invoice={@invoice}
+    patch={~p"/invoices/#{@invoice}"}
+  />
+</.modal>

@@ -1,0 +1,136 @@
+<.flash_group flash={@flash} />
+
+<div class="bg-white">
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 py-10 px-6 sm:px-8">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl font-bold text-white">CRM Dashboard</h1>
+      <p class="mt-2 text-lg text-blue-100">Manage your customers, inventory, and invoices</p>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dt class="text-sm font-medium text-gray-500 truncate">Customers</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">Manage</div>
+              </dd>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-4 sm:px-6">
+          <div class="text-sm">
+            <a href="/customers" class="font-medium text-blue-600 hover:text-blue-500">View all customers<span class="sr-only"> customers</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dt class="text-sm font-medium text-gray-500 truncate">Inventory</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">Products</div>
+              </dd>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-4 sm:px-6">
+          <div class="text-sm">
+            <a href="/products" class="font-medium text-blue-600 hover:text-blue-500">View all products<span class="sr-only"> products</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dt class="text-sm font-medium text-gray-500 truncate">Invoicing</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">Invoices</div>
+              </dd>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-4 sm:px-6">
+          <div class="text-sm">
+            <a href="/invoices" class="font-medium text-blue-600 hover:text-blue-500">View all invoices<span class="sr-only"> invoices</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white shadow rounded-lg mb-8">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Quick Actions</h3>
+        <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div>
+            <a href="/customers/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full justify-center">
+              New Customer
+            </a>
+          </div>
+          <div>
+            <a href="/products/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full justify-center">
+              New Product
+            </a>
+          </div>
+          <div>
+            <a href="/invoices/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full justify-center">
+              New Invoice
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">CRM System Overview</h3>
+        <div class="mt-2 max-w-xl text-sm text-gray-500">
+          <p>This CRM system helps you manage your customers, inventory, and invoices in one place.</p>
+        </div>
+        <div class="mt-5">
+          <div class="rounded-md bg-gray-50 px-6 py-5">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div>
+                <h4 class="text-base font-medium text-gray-900">Customer Management</h4>
+                <p class="mt-2 text-sm text-gray-500">Track customer information, contact details, and order history.</p>
+              </div>
+              <div>
+                <h4 class="text-base font-medium text-gray-900">Inventory System</h4>
+                <p class="mt-2 text-sm text-gray-500">Manage your products, stock levels, and pricing information.</p>
+              </div>
+              <div>
+                <h4 class="text-base font-medium text-gray-900">Invoicing System</h4>
+                <p class="mt-2 text-sm text-gray-500">Create and manage invoices linked to customers and products.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
