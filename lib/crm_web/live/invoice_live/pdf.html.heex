@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice <%= @invoice.id %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .invoice-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+    }
+    .invoice-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    .invoice-details {
+      margin-bottom: 30px;
+    }
+    .invoice-details-grid {
+      display: flex;
+      justify-content: space-between;
+    }
+    .invoice-details-column {
+      flex: 1;
+    }
+    .invoice-details-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #666;
+    }
+    .invoice-details-value {
+      margin-bottom: 15px;
+    }
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    .invoice-table th {
+      background-color: #f5f5f5;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+    }
+    .invoice-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .invoice-table .text-right {
+      text-align: right;
+    }
+    .invoice-totals {
+      width: 300px;
+      margin-left: auto;
+    }
+    .invoice-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+    .invoice-total-label {
+      font-weight: bold;
+    }
+    .invoice-total-value {
+      text-align: right;
+    }
+    .invoice-total-final {
+      font-size: 16px;
+      font-weight: bold;
+      border-top: 2px solid #333;
+      padding-top: 5px;
+      margin-top: 5px;
+    }
+    .invoice-notes {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-container">
+    <div class="invoice-header">
+      <div>
+        <div class="invoice-title">INVOICE</div>
+        <div>CRM System</div>
+      </div>
+      <div>
+        <div class="invoice-details-label">Invoice #</div>
+        <div class="invoice-details-value"><%= @invoice.invoice_number || "SI-001#{@invoice.id}" %></div>
+        <div class="invoice-details-label">Date</div>
+        <div class="invoice-details-value"><%= @invoice.date %></div>
+      </div>
+    </div>
+
+    <div class="invoice-details">
+      <div class="invoice-details-grid">
+        <div class="invoice-details-column">
+          <div class="invoice-details-label">Bill To:</div>
+          <div class="invoice-details-value">
+            <%= @invoice.customer.person_in_charge %><br>
+            <%= @invoice.customer.company_address %><br>
+            <%= @invoice.customer.email %><br>
+            <%= @invoice.customer.phone %>
+          </div>
+        </div>
+        <div class="invoice-details-column">
+          <div class="invoice-details-label">From:</div>
+          <div class="invoice-details-value">
+            Your Company Name<br>
+            123 Business Street<br>
+            Business City, 12345<br>
+            contact@yourcompany.com<br>
+            +1 (123) 456-7890
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Discount (%)</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for item <- @invoice.invoice_items do %>
+          <tr>
+            <td><%= item.product.name %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.unit_price %></td>
+            <td><%= item.discount || 0 %>%</td>
+            <td class="text-right">
+              <% item_total = Decimal.mult(item.unit_price, Decimal.new(item.quantity)) %>
+              <% discount_amount = if item.discount && Decimal.compare(item.discount, Decimal.new(0)) == :gt do
+                   Decimal.mult(item_total, Decimal.div(item.discount, Decimal.new(100)))
+                 else
+                   Decimal.new(0)
+                 end %>
+              <%= Decimal.sub(item_total, discount_amount) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div class="invoice-totals">
+      <div class="invoice-total-row invoice-total-final">
+        <div class="invoice-total-label">Total:</div>
+        <div class="invoice-total-value"><%= @invoice.total_amount %></div>
+      </div>
+    </div>
+
+    <div class="invoice-notes">
+      <div class="invoice-details-label">Notes:</div>
+      <div>Thank you for your business!</div>
+    </div>
+  </div>
+</body>
+</html>

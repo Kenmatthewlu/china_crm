@@ -36,6 +36,9 @@ defmodule CrmWeb.Router do
     live "/invoices/:id/edit", InvoiceLive.Index, :edit
     live "/invoices/:id", InvoiceLive.Show, :show
     live "/invoices/:id/show/edit", InvoiceLive.Show, :edit
+    
+    # PDF Export routes
+    get "/invoices/:id/pdf", PdfController, :invoice
   end
 
   # Other scopes may use custom stacks.

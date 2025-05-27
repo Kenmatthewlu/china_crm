@@ -1,0 +1,78 @@
+<div class="invoice-print">
+  <div class="invoice-header">
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 24px; font-weight: bold; margin: 0;">INVOICE</h1>
+        <p>CRM System</p>
+      </div>
+      <div style="text-align: right;">
+        <p style="font-weight: bold;">Invoice #</p>
+        <p style="font-size: 16px;"><%= @invoice.invoice_number || "SI-001#{@invoice.id}" %></p>
+        <p style="font-weight: bold; margin-top: 10px;">Date</p>
+        <p><%= @invoice.date %></p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+    <div style="width: 48%;">
+      <p style="font-weight: bold; margin-bottom: 5px;">Bill To:</p>
+      <p><%= @invoice.customer.person_in_charge %><br>
+        <%= @invoice.customer.company_address || "N/A" %><br>
+        <%= @invoice.customer.email || "N/A" %><br>
+        <%= @invoice.customer.phone || "N/A" %></p>
+    </div>
+    <div style="width: 48%; text-align: right;">
+      <p style="font-weight: bold; margin-bottom: 5px;">From:</p>
+      <p>ATLAS PACIFICA VENTURES OPC<br>
+        12th Floor, The Trade & Financial Tower U1206<br>
+        Bth Ave & 32nd St Bonifacio Global City<br>
+        Taguig City 1634<br>
+        daniellokeruixian@gmail.com<br>
+        +639664016784</p>
+    </div>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <thead>
+      <tr style="background-color: #f5f5f5;">
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Item</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Quantity</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Unit Price</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Discount (%)</th>
+        <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for item <- @invoice.invoice_items do %>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.product.name %></td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.quantity %></td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.unit_price %></td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.discount || 0 %>%</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">
+            <% item_total = Decimal.mult(item.unit_price, Decimal.new(item.quantity)) %>
+            <% discount_amount = if item.discount && Decimal.compare(item.discount, Decimal.new(0)) == :gt do
+                 Decimal.mult(item_total, Decimal.div(item.discount, Decimal.new(100)))
+               else
+                 Decimal.new(0)
+               end %>
+            <%= Decimal.sub(item_total, discount_amount) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div style="width: 300px; margin-left: auto;">
+    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px;">
+      <div>Total:</div>
+      <div><%= @invoice.total_amount %></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd;">
+    <p style="font-weight: bold;">Notes:</p>
+    <p>Thank you for your business!</p>
+  </div>
+</div>

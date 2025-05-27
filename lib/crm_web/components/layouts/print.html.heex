@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <title>Invoice Print</title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <style>
+      @media print {
+        @page {
+          size: A4;
+          margin: 1cm;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.5;
+          color: #333;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+      }
+      
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+      }
+      
+      .print-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+      }
+      
+      .print-nav {
+        background-color: #1f2937;
+        padding: 1rem;
+        color: white;
+      }
+      
+      .print-nav-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .print-logo {
+        font-weight: bold;
+        font-size: 1.25rem;
+      }
+      
+      .print-actions {
+        display: flex;
+        gap: 1rem;
+        margin: 20px 0;
+      }
+      
+      .print-button {
+        background-color: #10B981;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      
+      .print-button svg {
+        margin-right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+      
+      .back-button {
+        background-color: #6B7280;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      
+      .back-button svg {
+        margin-right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      @media screen {
+        .print-only {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="print-nav no-print">
+      <div class="print-nav-inner">
+        <div class="print-logo">
+          <a href="/" style="color: white; text-decoration: none;">CRM System</a>
+        </div>
+        <div class="print-actions">
+          <a href="/invoices" class="back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Invoices
+          </a>
+          <button class="print-button" onclick="window.print()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Print Invoice
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="print-container">
+      {@inner_content}
+    </div>
+    
+    <script>
+      // Auto-print when page loads (uncomment if desired)
+      // window.onload = function() {
+      //   window.print();
+      // };
+    </script>
+  </body>
+</html>

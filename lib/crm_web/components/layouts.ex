@@ -11,4 +11,9 @@ defmodule CrmWeb.Layouts do
   use CrmWeb, :html
 
   embed_templates "layouts/*"
+
+  # Add an explicit render function for the print layout
+  def render("print.html", assigns) do
+    print(assigns)
+  end
 end

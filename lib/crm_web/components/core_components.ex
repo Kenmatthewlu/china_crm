@@ -436,7 +436,7 @@ defmodule CrmWeb.CoreComponents do
           {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none">{render_slot(@actions)}</div>
+      <div class="flex">{render_slot(@actions)}</div>
     </header>
     """
   end
