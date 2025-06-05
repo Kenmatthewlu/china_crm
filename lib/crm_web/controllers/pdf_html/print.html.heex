@@ -40,6 +40,7 @@
         <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Quantity</th>
         <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Unit Price</th>
         <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Discount (%)</th>
+        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; width: 30%;">Description</th>
         <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">Total</th>
       </tr>
     </thead>
@@ -50,6 +51,7 @@
           <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.quantity %></td>
           <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.unit_price %></td>
           <td style="padding: 10px; border-bottom: 1px solid #ddd;"><%= item.discount || 0 %>%</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; font-style: italic; color: #555; white-space: pre-wrap;"><%= Map.get(item, :description, "") %></td>
           <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">
             <% item_total = Decimal.mult(item.unit_price, Decimal.new(item.quantity)) %>
             <% discount_amount = if item.discount && Decimal.compare(item.discount, Decimal.new(0)) == :gt do

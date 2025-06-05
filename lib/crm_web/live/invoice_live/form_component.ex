@@ -6,9 +6,14 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
   alias Crm.Inventory
   alias Crm.Invoicing.Invoice
   alias Crm.Invoicing.InvoiceItem
+  alias Phoenix.LiveView.JS
 
   @impl true
   def render(assigns) do
+    assigns = assign_new(assigns, :show_description_modal, fn -> false end)
+    assigns = assign_new(assigns, :editing_item_index, fn -> nil end)
+    assigns = assign_new(assigns, :current_description, fn -> "" end)
+
     ~H"""
     <div class="max-w-4xl mx-auto">
       <.header>
@@ -42,13 +47,47 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
           </div>
 
           <div class="overflow-x-auto">
+            <%= if @show_description_modal do %>
+              <div class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full z-50 p-4">
+                  <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Edit Item Description</h3>
+                    <button type="button" class="text-gray-500 hover:text-gray-700" phx-click="close-modal" phx-target={@myself}>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      class="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      rows="4"
+                      phx-keyup="update-description"
+                      phx-target={@myself}><%= @current_description %></textarea>
+                  </div>
+
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      phx-click="save-description"
+                      phx-target={@myself}>
+                      Save Description
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% end %>
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Product</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Product</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Quantity</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Unit Price</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Discount (%)</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Discount (%)</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Description</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Total</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Actions</th>
                 </tr>
@@ -121,17 +160,40 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
                       />
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-
+                      <div class="flex items-center">
+                        <input
+                          type="hidden"
+                          name={"invoice[items][#{index}][description]"}
+                          id={"invoice_items_#{index}_description"}
+                          value={Map.get(item, :description, "")}
+                        />
+                        <div class="truncate max-w-xs">
+                          <%= if Map.get(item, :description) && Map.get(item, :description) != "" do %>
+                            <%= Map.get(item, :description) %>
+                          <% else %>
+                            <span class="text-gray-400 italic">No description</span>
+                          <% end %>
+                        </div>
+                        <button
+                          type="button"
+                          class="ml-2 text-indigo-600 hover:text-indigo-900"
+                          phx-click="edit-description"
+                          phx-target={@myself}
+                          phx-value-index={index}>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                         <%= if item.quantity && item.unit_price do %>
                           <% item_total = Decimal.mult(Decimal.new(item.quantity), item.unit_price) %>
-                          <% discount_amount = if Decimal.compare(item.discount || Decimal.new(0), Decimal.new(0)) == :gt do
-                               Decimal.mult(item_total, Decimal.div(item.discount || Decimal.new(0), Decimal.new(100)))
-                             else
-                               Decimal.new(0)
-                             end %>
-                          <%= Decimal.sub(item_total, discount_amount) %>
+                          <% discount_amount = Decimal.div(Decimal.mult(item_total, item.discount || Decimal.new(0)), Decimal.new(100)) %>
+                          <% final_total = Decimal.sub(item_total, discount_amount) %>
+                          <%= final_total %>
                         <% else %>
-                          0.00
+                          0
                         <% end %>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -167,11 +229,22 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
 
     # Convert invoice items to a format suitable for the form
     form_items = Enum.map(invoice_items, fn item ->
-      %{id: item.id, product_id: item.product_id, quantity: item.quantity, unit_price: item.unit_price, discount: item.discount || Decimal.new(0)}
+      %{
+        id: item.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        discount: item.discount || Decimal.new(0),
+        description: Map.get(item, :description, "")
+      }
     end)
 
     # If there are no items, add an empty one
-    form_items = if Enum.empty?(form_items), do: [%{product_id: nil, quantity: 1, unit_price: nil, discount: Decimal.new(0)}], else: form_items
+    form_items = if Enum.empty?(form_items) do
+      [%{product_id: nil, quantity: 1, unit_price: nil, discount: Decimal.new(0), description: ""}]
+    else
+      form_items
+    end
 
     # Get customer and product options for select fields
     customer_options = Customers.list_customers()
@@ -211,39 +284,15 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
   @impl true
   def handle_event("validate", %{"invoice" => invoice_params}, socket) do
     changeset = Invoicing.change_invoice(%Invoice{}, invoice_params)
-    IO.inspect to_form(changeset)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
-  def handle_event("add-item", _, socket) do
-    invoice_items = socket.assigns.invoice_items ++ [%{product_id: nil, quantity: 1, unit_price: nil, discount: Decimal.new(0)}]
-
-    {:noreply,
-     socket
-     |> assign(:invoice_items, invoice_items)
-     |> update_totals()}
-  end
-
-  def handle_event("remove-item", %{"index" => index}, socket) do
-    index = String.to_integer(index)
-    invoice_items = List.delete_at(socket.assigns.invoice_items, index)
-
-    # Ensure there's always at least one item
-    invoice_items = if Enum.empty?(invoice_items), do: [%{product_id: nil, quantity: 1, unit_price: nil, discount: Decimal.new(0)}], else: invoice_items
-
-    {:noreply,
-     socket
-     |> assign(:invoice_items, invoice_items)
-     |> update_totals()}
-  end
-
-  def handle_event("product-selected", %{"_target" => ["invoice", "items", index, "product_id"], "invoice" => %{"items" => items}} = params, socket) do
-
+  def handle_event("product-selected", %{"_target" => ["invoice", "items", index, "product_id"], "invoice" => %{"items" => items}} = _params, socket) do
     product_id = get_in(items, [index, "product_id"]) |> String.to_integer()
 
     invoice_items = List.update_at(socket.assigns.invoice_items, String.to_integer(index), fn item ->
       product = Map.get(socket.assigns.products_map, product_id)
-      %{item | product_id: product_id, unit_price: product.price_retail}
+      Map.merge(item, %{product_id: product_id, unit_price: product.price_retail})
     end)
 
     {:noreply,
@@ -252,14 +301,22 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
      |> update_totals()}
   end
 
+  def handle_event("add-item", _, socket) do
+    invoice_items = socket.assigns.invoice_items ++ [%{
+      product_id: nil,
+      quantity: 1,
+      unit_price: nil,
+      discount: Decimal.new(0),
+      description: ""
+    }]
 
-
-  def handle_event("prevent-submit", _params, socket) do
-    # Just prevent default form submission on Enter key
-    {:noreply, socket}
+    {:noreply,
+     socket
+     |> assign(:invoice_items, invoice_items)
+     |> update_totals()}
   end
 
-  def handle_event("update-item-total", %{"_target" => ["invoice", "items", index, field], "invoice" => %{"items" => items}} = params, socket) do
+  def handle_event("update-item-total", %{"_target" => ["invoice", "items", index, field], "invoice" => %{"items" => items}} = _params, socket) do
     # Get the current value from the form
     current_value = case field do
       "quantity" ->
@@ -269,23 +326,64 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
         discount_str = get_in(items, [index, "discount"]) || "0"
         if discount_str != "", do: Decimal.new(discount_str), else: Decimal.new(0)
       _ -> nil
-    end |> IO.inspect
+    end
 
     # Update the specific item field
     invoice_items = List.update_at(socket.assigns.invoice_items, String.to_integer(index), fn item ->
       case field do
         "quantity" ->
-          %{item | quantity: current_value}
+          Map.put(item, :quantity, current_value)
         "discount" ->
-          %{item | discount: current_value}
+          Map.put(item, :discount, current_value)
+        "description" ->
+          Map.put(item, :description, current_value)
         _ -> item
-      end |> IO.inspect
+      end
     end)
 
-    {:noreply,
-     socket
-     |> assign(:invoice_items, invoice_items)
-     |> update_totals()}
+    {:noreply, socket
+      |> assign(:invoice_items, invoice_items)
+      |> update_totals()}
+  end
+
+  def handle_event("remove-item", %{"index" => index}, socket) do
+    index = String.to_integer(index)
+    invoice_items = List.delete_at(socket.assigns.invoice_items, index)
+
+    # Ensure there's always at least one item
+    invoice_items = if Enum.empty?(invoice_items), do: [%{product_id: nil, quantity: 1, unit_price: nil, discount: Decimal.new(0), description: ""}], else: invoice_items
+
+    {:noreply, socket
+      |> assign(:invoice_items, invoice_items)
+      |> update_totals()}
+  end
+
+  def handle_event("edit-description", %{"index" => index}, socket) do
+    index = String.to_integer(index)
+    item = Enum.at(socket.assigns.invoice_items, index)
+
+    {:noreply, socket
+      |> assign(:show_description_modal, true)
+      |> assign(:editing_item_index, index)
+      |> assign(:current_description, Map.get(item, :description, ""))}
+  end
+
+  def handle_event("save-description", _params, socket) do
+    invoice_items = List.update_at(socket.assigns.invoice_items, socket.assigns.editing_item_index, fn item ->
+      Map.put(item, :description, socket.assigns.current_description)
+    end)
+
+    {:noreply, socket
+      |> assign(:invoice_items, invoice_items)
+      |> assign(:show_description_modal, false)}
+  end
+
+  def handle_event("update-description", %{"value" => value}, socket) do
+    {:noreply, socket |> assign(:current_description, value)}
+  end
+
+  def handle_event("close-modal", _params, socket) do
+    {:noreply, socket |> assign(:show_description_modal, false)}
   end
 
   def handle_event("save", %{"invoice" => invoice_params}, socket) do
@@ -298,7 +396,8 @@ defmodule CrmWeb.InvoiceLive.FormComponent do
         product_id: if(item["product_id"] && item["product_id"] != "", do: String.to_integer(item["product_id"]), else: nil),
         quantity: if(item["quantity"] && item["quantity"] != "", do: String.to_integer(item["quantity"]), else: 0),
         unit_price: if(item["unit_price"] && item["unit_price"] != "", do: Decimal.new(item["unit_price"]), else: nil),
-        discount: if(item["discount"] && item["discount"] != "", do: Decimal.new(item["discount"]), else: Decimal.new(0))
+        discount: if(item["discount"] && item["discount"] != "", do: Decimal.new(item["discount"]), else: Decimal.new(0)),
+        description: item["description"] || ""
       }
     end)
     |> Enum.filter(fn item -> item.product_id != nil && item.quantity > 0 && item.unit_price != nil end)

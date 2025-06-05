@@ -93,6 +93,14 @@
       padding-top: 20px;
       border-top: 1px solid #ddd;
     }
+    .item-description {
+      font-size: 11px;
+      font-style: italic;
+      color: #555;
+      padding: 0 10px 10px 10px;
+      white-space: pre-wrap;
+      border-bottom: 1px solid #eee;
+    }
   </style>
 </head>
 <body>
@@ -141,6 +149,7 @@
           <th>Quantity</th>
           <th>Unit Price</th>
           <th>Discount (%)</th>
+          <th>Description</th>
           <th class="text-right">Total</th>
         </tr>
       </thead>
@@ -151,6 +160,9 @@
             <td><%= item.quantity %></td>
             <td><%= item.unit_price %></td>
             <td><%= item.discount || 0 %>%</td>
+            <td class="item-description">
+              <%= Map.get(item, :description, "") %>
+            </td>
             <td class="text-right">
               <% item_total = Decimal.mult(item.unit_price, Decimal.new(item.quantity)) %>
               <% discount_amount = if item.discount && Decimal.compare(item.discount, Decimal.new(0)) == :gt do
